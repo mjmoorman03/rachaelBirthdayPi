@@ -26,7 +26,7 @@ OR just
 ```
 ssh mmoorman@mm-hearts-rd
 ```
-You will need to enter the password you stored in your Apple passwords app.
+You will need to enter the password you stored in your Apple passwords app if not on your Pop_OS! system, which has a generated SSH key.
 
 # Other changes and steps to document
 
