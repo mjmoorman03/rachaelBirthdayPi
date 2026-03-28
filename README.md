@@ -58,8 +58,8 @@ Will be using a subdomain of my main domain, `rachael.michaeljmoorman.com`, in o
 
 We store the most recent message in an Upstash Redis store.
 
-Run `vercel dev` to test locally.
+Run `vercel dev` to develop locally, rather than npm run dev (for Redis stores).
 
-##
+Run `npm run test` to properly test with Vitest.
 
 In general, consider this code self-documented!
