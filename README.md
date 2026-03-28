@@ -56,7 +56,9 @@ Items Bought:
 
 Will be using a subdomain of my main domain, `rachael.michaeljmoorman.com`, in order to host it.
 
-Run `vercel dev` to test locally. 
+We store the most recent message in an Upstash Redis store.
+
+Run `vercel dev` to test locally.
 
 ##
 

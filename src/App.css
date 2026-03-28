@@ -7,10 +7,3 @@
   padding: 24px;
   box-sizing: border-box;
 }
-
-.message-card {
-  width: 100%;
-  max-width: 520px;
-  padding: 28px;
-  border-radius: 16px;
-}
