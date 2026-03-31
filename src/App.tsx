@@ -97,12 +97,10 @@ function App() {
           <TextField
             label="Text"
             value={message.text ?? ""}
-            onChange={(event) =>
-              setMessage((current) => ({
-                ...current,
-                text: event.target.value,
-              }))
-            }
+            onChange={(event) => {
+              const text = event.target.value;
+              setMessage((current) => ({ ...current, text }));
+            }}
             fullWidth
           />
 
@@ -110,15 +108,14 @@ function App() {
             select
             label="Decoration"
             value={message.decoration ?? ""}
-            onChange={(event) =>
+            onChange={(event) => {
+              const value = event.target.value;
               setMessage((current) => ({
                 ...current,
                 decoration:
-                  event.target.value === ""
-                    ? null
-                    : (event.target.value as Message["decoration"]),
-              }))
-            }
+                  value === "" ? null : (value as Message["decoration"]),
+              }));
+            }}
             fullWidth
           >
             <MenuItem value="">None</MenuItem>
@@ -128,15 +125,27 @@ function App() {
           </TextField>
 
           <TextField
+            label="Color"
+            type="color"
+            value={message.color ?? "#000000"}
+            onChange={(event) => {
+              setMessage((current) => ({
+                ...current,
+                color: event.target.value,
+              }));
+            }}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+          />
+
+          <TextField
             label="Size"
             type="number"
             value={message.size ?? ""}
-            onChange={(event) =>
-              setMessage((current) => ({
-                ...current,
-                size: Number(event.target.value),
-              }))
-            }
+            onChange={(event) => {
+              const size = Number(event.target.value);
+              setMessage((current) => ({ ...current, size }));
+            }}
             fullWidth
           />
 
@@ -144,15 +153,14 @@ function App() {
             select
             label="Animation"
             value={message.animation ?? ""}
-            onChange={(event) =>
+            onChange={(event) => {
+              const value = event.target.value;
               setMessage((current) => ({
                 ...current,
                 animation:
-                  event.target.value === ""
-                    ? null
-                    : (event.target.value as Message["animation"]),
-              }))
-            }
+                  value === "" ? null : (value as Message["animation"]),
+              }));
+            }}
             fullWidth
           >
             <MenuItem value="">None</MenuItem>
@@ -165,12 +173,10 @@ function App() {
             label="Link"
             type="url"
             value={message.link ?? ""}
-            onChange={(event) =>
-              setMessage((current) => ({
-                ...current,
-                link: event.target.value,
-              }))
-            }
+            onChange={(event) => {
+              const link = event.target.value;
+              setMessage((current) => ({ ...current, link }));
+            }}
             fullWidth
           />
 
