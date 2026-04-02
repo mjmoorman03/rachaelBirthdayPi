@@ -13,10 +13,13 @@ import {
   Typography,
 } from "@mui/material";
 
+const ICON_TEMPLATES = ["{{heart}}", "{{star}}", "{{note}}", "{{check}}", "{{arrow}}"];
+
 const emptyMessage = (): Message => ({
   text: "",
   decoration: null,
   size: 16,
+  style: "plain",
   animation: null,
   link: "",
 });
@@ -101,8 +104,27 @@ function App() {
               const text = event.target.value;
               setMessage((current) => ({ ...current, text }));
             }}
+            helperText={`Icons: ${ICON_TEMPLATES.join("  ")}`}
             fullWidth
           />
+
+          <TextField
+            select
+            label="Style"
+            value={message.style ?? "plain"}
+            onChange={(event) => {
+              const value = event.target.value;
+              setMessage((current) => ({
+                ...current,
+                style: value === "" ? null : (value as Message["style"]),
+              }));
+            }}
+            fullWidth
+          >
+            <MenuItem value="plain">Plain</MenuItem>
+            <MenuItem value="centered">Centered</MenuItem>
+            <MenuItem value="bubble">Bubble</MenuItem>
+          </TextField>
 
           <TextField
             select
@@ -123,20 +145,6 @@ function App() {
             <MenuItem value="bold">Bold</MenuItem>
             <MenuItem value="underline">Underline</MenuItem>
           </TextField>
-
-          <TextField
-            label="Color"
-            type="color"
-            value={message.color ?? "#000000"}
-            onChange={(event) => {
-              setMessage((current) => ({
-                ...current,
-                color: event.target.value,
-              }));
-            }}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
 
           <TextField
             label="Size"
