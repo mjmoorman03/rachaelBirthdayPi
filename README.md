@@ -42,7 +42,44 @@ To remote into the pi via cursor, run
 
 # Other changes and steps to document
 
-Items Bought:
+
+
+I also created various connections in `/etc/NetworkManager/system-connections` with the following contents in the Raspberry Pi
+
+```
+
+[connection]
+id=HomeWiFi
+type=wifi
+autoconnect=true
+
+[wifi]
+mode=infrastructure
+ssid=YOUR_SSID
+
+[wifi-security]
+auth-alg=open
+key-mgmt=wpa-psk
+psk=YOUR_PASSWORD
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=auto
+
+```
+
+then did 
+
+```
+
+sudo chown root:root /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
+sudo chmod 600 /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
+
+```
+
+# Items Bought:
 
 1. Raspberry Pi and a second one presoldered to make sure
 2. LCD screens
