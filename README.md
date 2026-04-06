@@ -100,3 +100,8 @@ Run `vercel dev` to develop locally, rather than npm run dev (for Redis stores).
 Run `npm run test` to properly test with Vitest.
 
 In general, consider this code self-documented!
+
+## other changes
+
+To make the modem be recognized properly, we have to disable the built-in `ModemManager`.
+look at cellular.sh which added as a startup script to enable cellular. it's not fully working on startup at the moment, which we'll need to debug.
