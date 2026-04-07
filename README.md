@@ -103,5 +103,8 @@ In general, consider this code self-documented!
 
 ## other changes
 
-To make the modem be recognized properly, we have to disable the built-in `ModemManager`.
-look at cellular.sh which added as a startup script to enable cellular. it's not fully working on startup at the moment, which we'll need to debug.
+See `cellular.sh` which enables cellular on startup using systemd
+
+Now, we're also using TailScale instead of Pi Connect in order to manage over network bc it was really screwing me trying to get pi connect to switch networks when wifi went down.
+
+So in tailscale it'll say it's down, but if you just take the ipv4 and ssh into that, it'll work, even with the wifi down!
