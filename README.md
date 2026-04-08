@@ -108,3 +108,10 @@ See `cellular.sh` which enables cellular on startup using systemd
 Now, we're also using TailScale instead of Pi Connect in order to manage over network bc it was really screwing me trying to get pi connect to switch networks when wifi went down.
 
 So in tailscale it'll say it's down, but if you just take the ipv4 and ssh into mmoorman@[that ip], it'll work, even with the wifi down!
+
+## YAY
+
+I have now tested it over only cellular. We simply need to run the main loop in the `messageDisplay`
+directory, which sets up a server to listen on 8080 for messages, which is routed through tailscale,
+and posted from our client. Bringing down wifi doesn't interrupt the server, as it maintains over cellular.
+GOATED!!!!
