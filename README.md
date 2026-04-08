@@ -91,13 +91,15 @@ sudo chmod 600 /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
 
 Will be using a subdomain of my main domain, `rachael.michaeljmoorman.com`, in order to host it.
 
-We store the most recent message in an Upstash Redis store.
-
-Run `vercel dev` to develop locally, rather than npm run dev (for Redis stores).
+Run `vercel dev` to develop locally.
 
 Run `npm run test` to properly test with Vitest.
 
 In general, consider this code self-documented!
+
+We'll be using a local server on the pi (with Tailscale funnel) to accept requests
+from our client at `rachael.michaeljmoorman.com` which authenticates and rate limits.
+This way, we won't do any polling at all, and can simply post requests directly.
 
 ## other changes
 

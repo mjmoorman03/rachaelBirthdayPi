@@ -4,8 +4,11 @@ export const useSendMessage = () => sendMessage;
 
 export const useGetMessage = () => getMessage;
 
+const PI_URL = (import.meta.env.VITE_PI_URL as string | undefined) ?? "";
+const MESSAGE_URL = `${PI_URL.replace(/\/$/, "")}/message`;
+
 const sendMessage = async (message: Message, bearer: string) => {
-  const response = await fetch("/api/message", {
+  const response = await fetch(MESSAGE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,7 +25,7 @@ const sendMessage = async (message: Message, bearer: string) => {
 };
 
 const getMessage = async (bearer: string): Promise<Message> => {
-  const response = await fetch("/api/message", {
+  const response = await fetch(MESSAGE_URL, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${bearer}`,
