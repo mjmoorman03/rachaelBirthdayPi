@@ -115,3 +115,5 @@ I have now tested it over only cellular. We simply need to run the main loop in 
 directory, which sets up a server to listen on 8080 for messages, which is routed through tailscale,
 and posted from our client. Bringing down wifi doesn't interrupt the server, as it maintains over cellular.
 GOATED!!!!
+
+We need to fix the multithreading for showing messages, and we should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using.
