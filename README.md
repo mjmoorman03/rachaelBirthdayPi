@@ -116,6 +116,6 @@ directory, which sets up a server to listen on 8080 for messages, which is route
 and posted from our client. Bringing down wifi doesn't interrupt the server, as it maintains over cellular.
 GOATED!!!!
 
-We need to fix the multithreading for showing messages, and we should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using. We also need to have that script run in the background on startup.
+We need to fix the multithreading for showing messages, and we should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using. We also need to have that script run in the background on startup. Also let's have an error state based on grep the journalctl of the cellular service for "Cellular Up".
 
 Also, we need to 3D print the enclosure still. Let's also get a vid of it working properly.
