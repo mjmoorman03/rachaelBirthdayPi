@@ -117,3 +117,5 @@ and posted from our client. Bringing down wifi doesn't interrupt the server, as 
 GOATED!!!!
 
 We need to fix the multithreading for showing messages, and we should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using.
+
+Also, we need to 3D print the enclosure still
