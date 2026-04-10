@@ -151,7 +151,8 @@ function App() {
             type="number"
             value={message.size ?? ""}
             onChange={(event) => {
-              const size = Number(event.target.value);
+              const value = event.target.value;
+              const size = value === "" ? undefined : Number(value);
               setMessage((current) => ({ ...current, size }));
             }}
             fullWidth

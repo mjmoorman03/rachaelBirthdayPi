@@ -40,6 +40,8 @@ To remote into the pi via cursor, run
 
 `cursor --folder-uri vscode-remote://ssh-remote+<hostname>/<folder_path>`
 
+However, now that we have Tailscale, just go into tailscale and find the ip, and just ssh into mmoorman@that ip. simple enough!
+
 # Other changes and steps to document
 
 I also created various connections in `/etc/NetworkManager/system-connections` with the following contents in the Raspberry Pi
@@ -76,6 +78,8 @@ sudo chown root:root /etc/NetworkManager/system-connections/HomeWiFi.nmconnectio
 sudo chmod 600 /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
 
 ```
+
+We've also added to systemd the services `cellular.service`, `messagedisplay.service` and `messagedisplay-failure.service`. Now, the cellular runs on startup, and then once that finishes, the app runs and forwards through tailscale to receive requests!
 
 # Items Bought:
 
@@ -116,6 +120,6 @@ directory, which sets up a server to listen on 8080 for messages, which is route
 and posted from our client. Bringing down wifi doesn't interrupt the server, as it maintains over cellular.
 GOATED!!!!
 
-We need to fix the multithreading for showing messages, and we should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using. We also need to have that script run in the background on startup. Also let's have an error state based on grep the journalctl of the cellular service for "Cellular Up".
+We should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using.
 
 Also, we need to 3D print the enclosure still. Let's also get a vid of it working properly.
