@@ -123,3 +123,7 @@ GOATED!!!!
 We should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using.
 
 Also, we need to 3D print the enclosure still. Let's also get a vid of it working properly.
+
+# 3D models
+
+See the files in the `CAD` directory to print!
