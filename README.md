@@ -1,129 +1,178 @@
 # Description
 
-This is a project for my girlfriend, Rachael, for her birthday! I'll be making her a little device with a Raspberry Pi Zero 2 W with a screen that displays messages I send to her (we're long distance)! This repo contains only the code for the website I will use for sending, storing, and fetching messages. The Pi code lives in a different repo!
+This is a project for my girlfriend, Rachael, for her birthday! I made her a little device with a Raspberry Pi Zero 2 W with an SSD1306 OLED screen that displays messages I send to her (we're long distance)! This repo contains only the code for the website I use for sending, storing, and fetching messages. The Pi code lives in a different repo.
 
-# OS changes
+The device uses a ZTE MF820B cellular modem with a Hologram SIM card to connect to the internet independently, so it doesn't need her WiFi at all. Messages are sent from a Vercel-hosted website at `rachael.michaeljmoorman.com`, which POSTs directly to a local server running on the Pi, exposed via Tailscale Funnel. The Pi stores the message locally and displays it on the OLED.
 
-The following was added to the PiOS image's `rootfs/etc/dhcpcd.conf` to give it a static ip so i can SSH into it (at least for development)
+# Hardware
+
+- Raspberry Pi Zero 2 W
+- SSD1306 128x64 OLED display (4-pin I2C: GND, VCC, SCK, SDA)
+- ZTE MF820B unlocked USB LTE modem
+- Hologram SIM card
+- Micro-USB OTG Y-cable (data to Pi, extra power from wall)
+- Dual-port USB wall adapter (one port for Pi PWR IN, one for Y-cable)
+- 3D printed PLA enclosure (see `CAD` directory)
+
+### OLED Wiring (I2C)
+
+| Display Pin | Pi Physical Pin |
+|---|---|
+| GND | Pin 6 |
+| VCC | Pin 1 (3.3V) |
+| SCK | Pin 5 (GPIO 3) |
+| SDA | Pin 3 (GPIO 2) |
+
+# SSH Access
+
+The simplest way to SSH in locally:
 
 ```
-interface eth0
-
-static ip_address=192.168.4.2/24
-static routers=192.168.4.1
-static domain_name_servers=192.168.4.1`
+ssh mmoorman@mm-hearts-rd.local
 ```
 
-Upon finishing development, we will want to likely disable SSH access to the Pi for security. We should still be able to access it via RaspberryPiConnect or whatever it's called.
-
-However, the above seems to be unreliable. So for local testing, run
+Or scan the network to find the IP:
 
 ```
 nmap -sn 192.168.1.0/24
 ```
 
-find the hostname `mm-hearts-rd` and find its IP address. Then, simply
+Find the hostname `mm-hearts-rd` and use its IP:
 
 ```
-ssh [FOUND IP]
+ssh mmoorman@[FOUND IP]
 ```
 
-OR just
+You will need the password stored in Apple Passwords if not on the Pop_OS! system, which has a generated SSH key.
+
+**Preferred method (works over cellular too):** Use the Tailscale IP. Find it at tailscale.com/admin or run `tailscale status` on any connected device, then:
 
 ```
-ssh mmoorman@mm-hearts-rd
+ssh mmoorman@[TAILSCALE IP]
 ```
 
-You will need to enter the password you stored in your Apple passwords app if not on your Pop_OS! system, which has a generated SSH key.
-
-To remote into the pi via cursor, run
-
-`cursor --folder-uri vscode-remote://ssh-remote+<hostname>/<folder_path>`
-
-However, now that we have Tailscale, just go into tailscale and find the ip, and just ssh into mmoorman@that ip. simple enough!
-
-# Other changes and steps to document
-
-I also created various connections in `/etc/NetworkManager/system-connections` with the following contents in the Raspberry Pi
+To remote in via Cursor:
 
 ```
-
-[connection]
-id=HomeWiFi
-type=wifi
-autoconnect=true
-
-[wifi]
-mode=infrastructure
-ssid=YOUR_SSID
-
-[wifi-security]
-auth-alg=open
-key-mgmt=wpa-psk
-psk=YOUR_PASSWORD
-
-[ipv4]
-method=auto
-
-[ipv6]
-method=auto
-
+cursor --folder-uri vscode-remote://ssh-remote+<hostname>/<folder_path>
 ```
 
-then did
+# OS / System Changes
+
+## Static IP (development only, deprecated)
+
+The following was added to the PiOS image's `rootfs/etc/dhcpcd.conf` during early development to give it a static IP for SSH. No longer relied upon:
 
 ```
-
-sudo chown root:root /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
-sudo chmod 600 /etc/NetworkManager/system-connections/HomeWiFi.nmconnection
-
+interface eth0
+static ip_address=192.168.4.2/24
+static routers=192.168.4.1
+static domain_name_servers=192.168.4.1
 ```
 
-We've also added to systemd the services `cellular.service`, `messagedisplay.service` and `messagedisplay-failure.service`. Now, the cellular runs on startup, and then once that finishes, the app runs and forwards through tailscale to receive requests!
+## I2C
 
-# Items Bought:
+I2C was enabled via `sudo raspi-config` → Interface Options → I2C → Enable, to support the OLED display.
 
-1. Raspberry Pi and a second one presoldered to make sure
-2. LCD screens
-3. Solder Iron
-4. Dupont jumper cables
-5. SIM Card
-6. SIM to Modem USB adapter
-7. Y cable splitter to make that work
+## Tailscale
+
+Tailscale is installed and running as a system service (`tailscaled`). The device is registered under the `mjmoorman03@gmail.com` account.
+
+Tailscale Funnel is configured persistently to expose port 8080:
+
+```
+https://mm-hearts-rd.tailb899b9.ts.net → localhost:8080
+```
+
+This is how `rachael.michaeljmoorman.com` reaches the Pi's local server.
+
+A systemd override was created to make `tailscaled` start after `cellular.service`:
+
+```
+/etc/systemd/system/tailscaled.service.d/override.conf
+```
+
+Contents:
+
+```ini
+[Unit]
+After=network-pre.target NetworkManager.service systemd-resolved.service cellular.service
+Wants=cellular.service
+```
+
+## ModemManager
+
+ModemManager is installed and **enabled** (not masked). It is used to manage the ZTE MF820B modem via `mmcli`. It was initially masked during debugging but re-enabled as it provides the most reliable modem management.
+
+## Cellular (cellular.service)
+
+A custom systemd service manages cellular connectivity on boot. See `cellular.sh` for the full script.
+
+Service file: `/etc/systemd/system/cellular.service`
+
+The script:
+1. Waits for the modem to be detected by ModemManager
+2. Waits for network registration
+3. Connects via `mmcli --simple-connect="apn=hologram"` with retries
+4. Gets an IP via `udhcpc -i wwan0`
+5. Adds a default route via wwan0 with metric 700 (lower priority than WiFi when both present)
+
+Key notes:
+- LTE-only mode (`4g preferred`) persists in modem firmware across reboots — does not need to be set each boot
+- The modem requires ~35-40 seconds after boot before it will accept a connection — the script waits for ModemManager to report `state: registered` before attempting
+- `--client-no-release-cid` is used, so stale CIDs accumulate — the script clears them with `--wds-stop-network=0xffffffff` before connecting
+
+## Message Display (messagedisplayer.service)
+
+A custom systemd service runs the Pi's local Python server. It starts after and requires `cellular.service`.
+
+Service file: `/etc/systemd/system/messagedisplayer.service`
+
+The server:
+- Listens on port 8080
+- Accepts POST requests to `/message` with a bearer token
+- Stores the message to a local file
+- Reads the file and updates the OLED display
+
+A failure service (`messagedisplayer-failed.service`) is also configured via `OnFailure=`.
+
+## Cron Jobs (root)
+
+Root crontab (`sudo crontab -e`) contains the following:
+
+```
+0 */3 * * * /sbin/reboot
+5 * * * * /bin/systemctl restart tailscaled
+```
+
+- **Reboot every 3 hours** — ensures the device doesn't get into a stuck state over time
+- **Restart tailscaled at 5 minutes past every hour** — ensures Tailscale tunnel recovers if it gets stuck. Staggered 5 minutes after the reboot job so they never overlap
+
+## Raspberry Pi Connect
+
+Pi Connect was installed and tested but **not relied upon** — it failed to switch from WiFi to cellular when WiFi was brought down. Tailscale is used instead for all remote access.
 
 # Deployment
 
-Will be using a subdomain of my main domain, `rachael.michaeljmoorman.com`, in order to host it.
+The frontend/backend lives at `rachael.michaeljmoorman.com` on Vercel.
 
 Run `vercel dev` to develop locally.
 
-Run `npm run test` to properly test with Vitest.
+Run `npm run test` to test with Vitest.
 
-In general, consider this code self-documented!
+The Vercel backend authenticates requests and POSTs directly to the Pi via Tailscale Funnel. No polling is used — messages are pushed directly to the device.
 
-We'll be using a local server on the pi (with Tailscale funnel) to accept requests
-from our client at `rachael.michaeljmoorman.com` which authenticates and rate limits.
-This way, we won't do any polling at all, and can simply post requests directly.
+# 3D Models
 
-## other changes
+See the `CAD` directory. The enclosure is printed in white PLA, split into two halves and joined with super glue. The OLED display window is cut into the top face. Components are mounted internally with adhesive foam pads.
 
-See `cellular.sh` which enables cellular on startup using systemd
+# Items Bought
 
-Now, we're also using TailScale instead of Pi Connect in order to manage over network bc it was really screwing me trying to get pi connect to switch networks when wifi went down.
-
-So in tailscale it'll say it's down, but if you just take the ipv4 and ssh into mmoorman@[that ip], it'll work, even with the wifi down!
-
-## YAY
-
-I have now tested it over only cellular. We simply need to run the main loop in the `messageDisplay`
-directory, which sets up a server to listen on 8080 for messages, which is routed through tailscale,
-and posted from our client. Bringing down wifi doesn't interrupt the server, as it maintains over cellular.
-GOATED!!!!
-
-We should prob test it running over the course of a day or two on only cellular to verify that everything goes smoothly, and to get an estimate of how much data we're actually using.
-
-Also, we need to 3D print the enclosure still. Let's also get a vid of it working properly.
-
-# 3D models
-
-See the files in the `CAD` directory to print!
+1. Raspberry Pi Zero 2 W (x2 — second one came pre-soldered)
+2. SSD1306 OLED display
+3. Soldering iron + solder + tip tinner
+4. Dupont jumper cables (female-to-female)
+5. Hologram SIM card
+6. ZTE MF820B unlocked USB LTE modem
+7. Micro-USB OTG Y-cable
+8. Dual-port USB wall adapter
